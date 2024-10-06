@@ -74,7 +74,7 @@ using (var scope = app.Services.CreateScope())
             dbContext.Database.SetCommandTimeout(300);
             dbContext.Database.Migrate();
 
-            //Enables easy seeding of database
+            //Enables easy seeding of database with mock hotels
             //await SeedHotels(dbContext).ConfigureAwait(false);
         }
     }

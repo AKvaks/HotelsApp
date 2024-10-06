@@ -6,6 +6,13 @@ This is a .NET Core 8 Web API designed as part of a technical interview. After m
 
 The assignment was to develop a JSON REST web service for hotel search. The service had to have two API interfaces. One was CRUD interface for hotels and the other was search interface. In the search interface, the list of hotels is ordered by price and proximity to user's location.
 
+## Before running the application
+
+> [!NOTE]
+> Make sure that you have SQL Server 2022 Express installed and that connection string is set correctly
+
+There is a SeedHotels method in Program.cs that can be used to populate database with mock hotel data. A call to this method is commented out in line 78.
+
 ## Migrations
 
 To create a new migration use the following console command
