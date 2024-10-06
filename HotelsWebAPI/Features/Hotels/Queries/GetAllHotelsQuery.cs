@@ -1,31 +1,27 @@
-﻿using HotelsWebAPI.DAL;
-using HotelsWebAPI.Features.Hotels.Models;
+﻿using HotelsWebAPI.Features.Hotels.Models;
+using HotelsWebAPI.Models;
+using HotelsWebAPI.Services.HotelService;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelsWebAPI.Features.Hotels.Queries
 {
-    public record GetAllHotelsQuery : IRequest<List<HotelResponseModel>>;
+    public record GetAllHotelsQuery : IRequest<BaseResponse<List<HotelResponseModel>>>;
 
-    public class GetAllHotelsQueryHandler : IRequestHandler<GetAllHotelsQuery, List<HotelResponseModel>>
+    public class GetAllHotelsQueryHandler : IRequestHandler<GetAllHotelsQuery, BaseResponse<List<HotelResponseModel>>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IHotelService _hotelService;
 
-        public GetAllHotelsQueryHandler(ApplicationDbContext dbContext)
+        public GetAllHotelsQueryHandler(IHotelService hotelService)
         {
-            _dbContext = dbContext;
+            _hotelService = hotelService;
         }
 
-        public async Task<List<HotelResponseModel>> Handle(GetAllHotelsQuery request, CancellationToken cancellationToken)
+        public async Task<BaseResponse<List<HotelResponseModel>>> Handle(GetAllHotelsQuery request, CancellationToken cancellationToken)
         {
-            return await _dbContext.Hotels.Select(x => new HotelResponseModel
-            {
-                Id = x.Id,
-                HotelName = x.HotelName,
-                Price = x.Price,
-                Latitude = x.Location.X,
-                Longitude = x.Location.Y,
-            }).ToListAsync();
+            var result = await _hotelService.GetAllHotelsAsync(cancellationToken);
+            if (result == null) return new BaseResponse<List<HotelResponseModel>> { StatusCode = 500, Message = "Error during communication with database!" };
+
+            return new BaseResponse<List<HotelResponseModel>> { Value = result, StatusCode = 200, Message = $"Hotel list successfully retrieved." };
         }
     }
 }

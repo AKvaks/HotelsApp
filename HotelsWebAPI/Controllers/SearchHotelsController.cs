@@ -1,6 +1,7 @@
 ﻿using HotelsWebAPI.Features.Hotels.Models;
 using HotelsWebAPI.Features.Hotels.Queries;
 using HotelsWebAPI.Features.Hotels.Validators;
+using HotelsWebAPI.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,26 +19,30 @@ namespace HotelsWebAPI.Controllers
             _sender = sender;
         }
 
-        // GET api/SearchHotels/5
-        [HttpGet("longitude={Longitude}&latitude={Latitude}&pageNumber={PageNumber}&pageSize={PageSize}")]
-        public async Task<ActionResult<List<SearchedHotelResponseModel>>> GetHotelsByDistanceGet(double Latitude, double Longitude, int PageNumber, int PageSize)
+        // GET api/SearchHotels?longitude=5.0&latitude=6.0&pageNumber=1&pageSize=10
+        [HttpGet]
+        public async Task<ActionResult<List<SearchedHotelResponseModel>>> GetHotelsByDistanceGet(double latitude, double longitude, int? pageNumber, int? pageSize)
         {
-            var query = new GetHotelsByDistanceQuery(Latitude, Longitude, PageNumber, PageSize);
+            var query = new GetHotelsByDistanceQuery(latitude, longitude, pageNumber, pageSize);
 
             var commandValidation = new GetHotelsByDistanceQueryValidator().Validate(query);
             if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
 
-            return Ok(await _sender.Send(query));
+            var result = await _sender.Send(query);
+            if (result.StatusCode == 500) return StatusCode(result.StatusCode, result.Message);
+            return Ok(result.Value);
         }
 
         // POST api/SearchHotels
         [HttpPost]
-        public async Task<ActionResult<List<SearchedHotelResponseModel>>> GetHotelsByDistancePost(GetHotelsByDistanceQuery query)
+        public async Task<ActionResult<BaseResponse<PagedResponse<SearchedHotelResponseModel>?>>> GetHotelsByDistancePost(GetHotelsByDistanceQuery query)
         {
             var commandValidation = new GetHotelsByDistanceQueryValidator().Validate(query);
             if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
 
-            return Ok(await _sender.Send(new GetHotelsByDistanceQuery(query.Latitude, query.Longitude, query.PageNumber, query.PageSize)));
+            var result = await _sender.Send(query);
+            if (result.StatusCode == 500) return StatusCode(result.StatusCode, result.Message);
+            return Ok(result.Value);
         }
     }
 }

@@ -1,45 +1,27 @@
-﻿using HotelsWebAPI.DAL;
-using HotelsWebAPI.Features.Hotels.Models;
-using HotelsWebAPI.Utilities;
+﻿using HotelsWebAPI.Features.Hotels.Models;
+using HotelsWebAPI.Models;
+using HotelsWebAPI.Services.HotelService;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace HotelsWebAPI.Features.Hotels.Queries
 {
-    public record GetHotelsByDistanceQuery(double Latitude, double Longitude, int PageNumber, int PageSize) : IRequest<List<SearchedHotelResponseModel>>;
+    public record GetHotelsByDistanceQuery(double Latitude, double Longitude, int? PageNumber, int? PageSize) : IRequest<BaseResponse<PagedResponse<SearchedHotelResponseModel>?>>;
 
-    public class GetHotelsByDistanceQueryHandler : IRequestHandler<GetHotelsByDistanceQuery, List<SearchedHotelResponseModel>>
+    public class GetHotelsByDistanceQueryHandler : IRequestHandler<GetHotelsByDistanceQuery, BaseResponse<PagedResponse<SearchedHotelResponseModel>?>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IHotelService _hotelService;
 
-        public GetHotelsByDistanceQueryHandler(ApplicationDbContext dbContext)
+        public GetHotelsByDistanceQueryHandler(IHotelService hotelService)
         {
-            _dbContext = dbContext;
+            _hotelService = hotelService;
         }
 
-        public async Task<List<SearchedHotelResponseModel>> Handle(GetHotelsByDistanceQuery request, CancellationToken cancellationToken)
+        public async Task<BaseResponse<PagedResponse<SearchedHotelResponseModel>?>> Handle(GetHotelsByDistanceQuery request, CancellationToken cancellationToken)
         {
-            var currentLocation = GeoUtils.CreatePoint(request.Latitude, request.Longitude);
+            var result = await _hotelService.GetHotelsByDistanceAsync(request.Latitude, request.Longitude, request.PageNumber, request.PageSize, cancellationToken);
+            if (result == null) return new BaseResponse<PagedResponse<SearchedHotelResponseModel>?> { StatusCode = 500, Message = "Error during communication with database!" };
 
-            var pageNumber = request.PageNumber;
-            if (pageNumber < 1) pageNumber = 1;
-
-            var pageSize = request.PageSize;
-            if (pageSize <= 0) pageSize = 10;
-
-            var hotels = await _dbContext.Hotels
-                .Select(h => new SearchedHotelResponseModel
-                {
-                    Id = h.Id,
-                    HotelName = h.HotelName,
-                    Price = h.Price,
-                    Distance = h.Location.Distance(currentLocation)
-                })
-                .OrderBy(h => h.Price)
-                .ThenBy(h => h.Distance)
-                .ToListAsync(cancellationToken);
-
-            return hotels;
+            return new BaseResponse<PagedResponse<SearchedHotelResponseModel>?> { Value = result, StatusCode = 200, Message = "Searched hotels retrived successfully!" };
         }
     }
 }

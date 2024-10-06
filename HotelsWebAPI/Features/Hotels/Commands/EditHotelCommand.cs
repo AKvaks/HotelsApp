@@ -1,39 +1,27 @@
-﻿using HotelsWebAPI.DAL;
-using HotelsWebAPI.Utilities;
+﻿using HotelsWebAPI.Models;
+using HotelsWebAPI.Services.HotelService;
 using MediatR;
 
 namespace HotelsWebAPI.Features.Hotels.Commands
 {
-    public record EditHotelCommand(int Id, string HotelName, decimal Price, double Latitude, double Longitude) : IRequest<int>;
+    public record EditHotelCommand(int Id, string HotelName, decimal Price, double Latitude, double Longitude) : IRequest<BaseResponse<int>>;
 
-    public class EditHotelCommandHandler : IRequestHandler<EditHotelCommand, int>
+    public class EditHotelCommandHandler : IRequestHandler<EditHotelCommand, BaseResponse<int>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IHotelService _hotelService;
 
-        public EditHotelCommandHandler(ApplicationDbContext dbContext)
+        public EditHotelCommandHandler(IHotelService hotelService)
         {
-            _dbContext = dbContext;
+            _hotelService = hotelService;
         }
 
-        public async Task<int> Handle(EditHotelCommand request, CancellationToken cancellationToken)
+        public async Task<BaseResponse<int>> Handle(EditHotelCommand request, CancellationToken cancellationToken)
         {
-            var hotelToEdit = await _dbContext.Hotels.FindAsync(request.Id);
-            if (hotelToEdit == null)
-            {
-                return -1;
-                // return NotFound
-            }
+            var hotelId = await _hotelService.EditHotelAsync(request.Id, request.HotelName, request.Price, request.Latitude, request.Longitude, cancellationToken);
+            if (hotelId == null) return new BaseResponse<int> { StatusCode = 500, Message = "Error during communication with database!" };
+            if (hotelId == -1) return new BaseResponse<int> { StatusCode = 404, Message = $"Hotel with Id {request.Id} not found!" };
 
-            var location = GeoUtils.CreatePoint(request.Latitude, request.Longitude);
-
-            hotelToEdit.HotelName = request.HotelName;
-            hotelToEdit.Price = request.Price;
-            hotelToEdit.Location = location;
-
-            _dbContext.Hotels.Update(hotelToEdit);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return hotelToEdit.Id;
+            return new BaseResponse<int> { StatusCode = 200, Message = $"Hotel was successfuly updated!" };
         }
     }
 }

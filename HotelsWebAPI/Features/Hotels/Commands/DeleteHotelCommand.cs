@@ -1,32 +1,27 @@
-﻿using HotelsWebAPI.DAL;
+﻿using HotelsWebAPI.Models;
+using HotelsWebAPI.Services.HotelService;
 using MediatR;
 
 namespace HotelsWebAPI.Features.Hotels.Commands
 {
-    public record DeleteHotelCommand(int Id) : IRequest<int>;
+    public record DeleteHotelCommand(int Id) : IRequest<BaseResponse<int>>;
 
-    public class DeleteHotelCommandHandler : IRequestHandler<DeleteHotelCommand, int>
+    public class DeleteHotelCommandHandler : IRequestHandler<DeleteHotelCommand, BaseResponse<int>>
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IHotelService _hotelService;
 
-        public DeleteHotelCommandHandler(ApplicationDbContext dbContext)
+        public DeleteHotelCommandHandler(IHotelService hotelService)
         {
-            _dbContext = dbContext;
+            _hotelService = hotelService;
         }
 
-        public async Task<int> Handle(DeleteHotelCommand request, CancellationToken cancellationToken)
+        public async Task<BaseResponse<int>> Handle(DeleteHotelCommand request, CancellationToken cancellationToken)
         {
-            var hotelToDelete = await _dbContext.Hotels.FindAsync(request.Id);
-            if (hotelToDelete == null)
-            {
-                return -1;
-                // return NotFound
-            }
+            var hotelId = await _hotelService.DeleteHotelAsync(request.Id, cancellationToken);
+            if (hotelId == null) return new BaseResponse<int> { StatusCode = 500, Message = "Error during communication with database!" };
+            if (hotelId == -1) return new BaseResponse<int> { StatusCode = 404, Message = $"Hotel with Id {request.Id} not found!" };
 
-            _dbContext.Hotels.Remove(hotelToDelete);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-
-            return hotelToDelete.Id;
+            return new BaseResponse<int> { Value = hotelId.Value, StatusCode = 200, Message = $"Hotel was successfuly deleted!" };
         }
     }
 }

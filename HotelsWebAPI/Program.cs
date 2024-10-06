@@ -1,5 +1,6 @@
 using FluentValidation;
 using HotelsWebAPI.DAL;
+using HotelsWebAPI.Services.HotelService;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +25,9 @@ builder.Services.AddMediatR(configuration =>
 
 //Add FluentValidation
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
+//Add HotelService
+builder.Services.AddScoped<IHotelService, HotelService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

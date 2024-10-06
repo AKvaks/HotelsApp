@@ -23,7 +23,9 @@ namespace HotelsWebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<HotelResponseModel>>> GetAllHotels()
         {
-            return Ok(await _sender.Send(new GetAllHotelsQuery()));
+            var result = await _sender.Send(new GetAllHotelsQuery());
+            if (result.StatusCode == 500) return StatusCode(result.StatusCode, result.Message);
+            return Ok(result.Value);
         }
 
         // GET api/HotelsManagement/5
@@ -37,31 +39,31 @@ namespace HotelsWebAPI.Controllers
 
             var result = await _sender.Send(command);
 
-            if (result == null) return NotFound($"Hotel with Id: {id} not found!");
+            if (result.StatusCode == 500 || result.StatusCode == 404) return StatusCode(result.StatusCode, result.Message);
 
-            return Ok(result);
+            return Ok(result.Value);
         }
 
         // POST api/HotelsManagement
         [HttpPost]
-        public async Task<ActionResult<int>> AddHotel(AddHotelCommand command)
+        public async Task<ActionResult<string>> AddHotel(AddHotelCommand command)
         {
             var commandValidation = new AddHotelCommandValidator().Validate(command);
             if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
 
-            var hotelId = await _sender.Send(command);
-            return Ok(hotelId);
+            var result = await _sender.Send(command);
+            return StatusCode(result.StatusCode, result.Message);
         }
 
         // PUT api/HotelsManagement
         [HttpPut]
-        public async Task<ActionResult<int>> UpdateHotelById(EditHotelCommand command)
+        public async Task<ActionResult<string>> UpdateHotelById(EditHotelCommand command)
         {
             var commandValidation = new EditHotelCommandValidator().Validate(command);
             if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
 
-            var hotelId = await _sender.Send(command);
-            return Ok(hotelId);
+            var result = await _sender.Send(command);
+            return StatusCode(result.StatusCode, result.Message);
         }
 
         // DELETE api/HotelsManagement
@@ -71,8 +73,8 @@ namespace HotelsWebAPI.Controllers
             var commandValidation = new DeleteHotelCommandValidator().Validate(command);
             if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
 
-            var hotelId = await _sender.Send(command);
-            return Ok(hotelId);
+            var result = await _sender.Send(command);
+            return StatusCode(result.StatusCode, result.Message);
         }
     }
 }
