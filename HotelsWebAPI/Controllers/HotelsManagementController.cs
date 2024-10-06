@@ -1,6 +1,7 @@
 ﻿using HotelsWebAPI.Features.Hotels.Commands;
 using HotelsWebAPI.Features.Hotels.Models;
 using HotelsWebAPI.Features.Hotels.Queries;
+using HotelsWebAPI.Features.Hotels.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +30,12 @@ namespace HotelsWebAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<HotelResponseModel?>> GetHotelById(int id)
         {
-            var result = await _sender.Send(new GetHotelByIdQuery(id));
+            var command = new GetHotelByIdQuery(id);
+
+            var commandValidation = new GetHotelByIdQueryValidator().Validate(command);
+            if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
+
+            var result = await _sender.Send(command);
 
             if (result == null) return NotFound($"Hotel with Id: {id} not found!");
 
@@ -40,6 +46,9 @@ namespace HotelsWebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<int>> AddHotel(AddHotelCommand command)
         {
+            var commandValidation = new AddHotelCommandValidator().Validate(command);
+            if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
+
             var hotelId = await _sender.Send(command);
             return Ok(hotelId);
         }
@@ -48,6 +57,9 @@ namespace HotelsWebAPI.Controllers
         [HttpPut]
         public async Task<ActionResult<int>> UpdateHotelById(EditHotelCommand command)
         {
+            var commandValidation = new EditHotelCommandValidator().Validate(command);
+            if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
+
             var hotelId = await _sender.Send(command);
             return Ok(hotelId);
         }
@@ -56,6 +68,9 @@ namespace HotelsWebAPI.Controllers
         [HttpDelete]
         public async Task<ActionResult<int>> DeleteHotelById(DeleteHotelCommand command)
         {
+            var commandValidation = new DeleteHotelCommandValidator().Validate(command);
+            if (!commandValidation.IsValid) return BadRequest(commandValidation.Errors.Select(x => x.ErrorMessage));
+
             var hotelId = await _sender.Send(command);
             return Ok(hotelId);
         }
