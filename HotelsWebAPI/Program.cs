@@ -1,6 +1,8 @@
 using FluentValidation;
 using HotelsWebAPI.DAL;
+using HotelsWebAPI.Entities;
 using HotelsWebAPI.Services.HotelService;
+using HotelsWebAPI.Utilities;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -73,6 +75,7 @@ using (var scope = app.Services.CreateScope())
             dbContext.Database.Migrate();
 
             //Enables easy seeding of database
+            //await SeedHotels(dbContext).ConfigureAwait(false);
         }
     }
     catch (Exception ex)
@@ -108,3 +111,40 @@ app.UseExceptionHandler(appError =>
 });
 
 app.Run();
+
+static async Task SeedHotels(ApplicationDbContext _dbContext)
+{
+    if (await _dbContext.Hotels.AnyAsync().ConfigureAwait(false) == false)
+    {
+        List<Hotel> hotels = new List<Hotel>()
+        {
+            new Hotel { HotelName = "Esplanade Zagreb Hotel 1", Price = 200m, Location = GeoUtils.CreatePoint(45.80740559761584, 15.975518240751384) },
+            new Hotel { HotelName = "Esplanade Zagreb Hotel 2", Price = 300m, Location = GeoUtils.CreatePoint(45.80740559761584, 15.975518240751384) },
+            new Hotel { HotelName = "Esplanade Zagreb Hotel 3", Price = 150m, Location = GeoUtils.CreatePoint(45.80740559761584, 15.975518240751384) },
+            new Hotel { HotelName = "Hotel Croatia 1", Price = 118m, Location = GeoUtils.CreatePoint(45.81646837913312, 15.9543182559186) },
+            new Hotel { HotelName = "Hotel Croatia 2", Price = 100m, Location = GeoUtils.CreatePoint(45.81646837913312, 15.9543182559186) },
+            new Hotel { HotelName = "Hotel Croatia 3", Price = 150m, Location = GeoUtils.CreatePoint(45.81646837913312, 15.9543182559186) },
+            new Hotel { HotelName = "Sheraton Zagreb Hotel 1", Price = 130.52m, Location = GeoUtils.CreatePoint(45.807133668188975, 15.984587653040613) },
+            new Hotel { HotelName = "Sheraton Zagreb Hotel 2", Price = 129.99m, Location = GeoUtils.CreatePoint(45.807133668188975, 15.984587653040613) },
+            new Hotel { HotelName = "Sheraton Zagreb Hotel 3", Price = 130.05m, Location = GeoUtils.CreatePoint(45.807133668188975, 15.984587653040613) },
+            new Hotel { HotelName = "The Westin Zagreb 1", Price = 109m, Location = GeoUtils.CreatePoint(45.80691893299671, 15.966249221299845) },
+            new Hotel { HotelName = "The Westin Zagreb 2", Price = 109.99m, Location = GeoUtils.CreatePoint(45.80691893299671, 15.966249221299845) },
+            new Hotel { HotelName = "The Westin Zagreb 3", Price = 3000m, Location = GeoUtils.CreatePoint(45.80691893299671, 15.966249221299845) },
+            new Hotel { HotelName = "Hotel Antunovic 1", Price = 130m, Location = GeoUtils.CreatePoint(45.79755982747399, 15.898817787145727) },
+            new Hotel { HotelName = "Hotel Antunovic 2", Price = 150m, Location = GeoUtils.CreatePoint(45.79755982747399, 15.898817787145727) },
+            new Hotel { HotelName = "Hotel Antunovic 3", Price = 125m, Location = GeoUtils.CreatePoint(45.79755982747399, 15.898817787145727) },
+            new Hotel { HotelName = "Palace Hotel 1", Price = 69.99m, Location = GeoUtils.CreatePoint(45.808662113917215, 15.977727633752567) },
+            new Hotel { HotelName = "Palace Hotel 2", Price = 70m, Location = GeoUtils.CreatePoint(45.808662113917215, 15.977727633752567) },
+            new Hotel { HotelName = "Palace Hotel 3", Price = 68m, Location = GeoUtils.CreatePoint(45.808662113917215, 15.977727633752567) },
+            new Hotel { HotelName = "Hotel Dubovnik 1", Price = 200m, Location = GeoUtils.CreatePoint(45.81272448782883, 15.976518707236014) },
+            new Hotel { HotelName = "Hotel Dubovnik 2", Price = 140m, Location = GeoUtils.CreatePoint(45.81272448782883, 15.976518707236014) },
+            new Hotel { HotelName = "Hotel Dubovnik 3", Price = 128m, Location = GeoUtils.CreatePoint(45.81272448782883, 15.976518707236014) },
+            new Hotel { HotelName = "Hotel Laguna 1", Price = 63m, Location = GeoUtils.CreatePoint(45.803943303449614, 15.958401120032823) },
+            new Hotel { HotelName = "Hotel Laguna 2", Price = 59m, Location = GeoUtils.CreatePoint(45.803943303449614, 15.958401120032823) },
+            new Hotel { HotelName = "Hotel Laguna 3", Price = 150m, Location = GeoUtils.CreatePoint(45.803943303449614, 15.958401120032823) },
+        };
+
+        await _dbContext.Hotels.AddRangeAsync(hotels);
+        await _dbContext.SaveChangesAsync();
+    }
+}
