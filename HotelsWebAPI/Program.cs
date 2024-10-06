@@ -1,6 +1,7 @@
 using FluentValidation;
 using HotelsWebAPI.DAL;
 using HotelsWebAPI.Services.HotelService;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,5 +68,30 @@ using (var scope = app.Services.CreateScope())
         throw;
     }
 }
+
+//Implement global error handling
+app.UseExceptionHandler(appError =>
+{
+    appError.Run(async errorContext =>
+    {
+        errorContext.Response.StatusCode = 500;
+        errorContext.Response.ContentType = "application/json";
+
+        var errorContextFeature = errorContext.Features.Get<IExceptionHandlerFeature>();
+
+        //If there are unhandled errors, we log them and user gets a minimal, user friendly message
+        //that does not reveal too much unnecessary information 
+        if (errorContextFeature != null)
+        {
+            Console.WriteLine($"Error: {errorContextFeature.Error}");
+
+            await errorContext.Response.WriteAsJsonAsync(new
+            {
+                StatusCore = errorContext.Response.StatusCode,
+                Message = "Internal Server Error"
+            });
+        }
+    });
+});
 
 app.Run();
