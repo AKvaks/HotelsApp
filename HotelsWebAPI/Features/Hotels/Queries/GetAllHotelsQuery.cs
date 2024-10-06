@@ -21,7 +21,7 @@ namespace HotelsWebAPI.Features.Hotels.Queries
             var result = await _hotelService.GetAllHotelsAsync(cancellationToken);
             if (result == null) return new BaseResponse<List<HotelResponseModel>> { StatusCode = 500, Message = "Error during communication with database!" };
 
-            return new BaseResponse<List<HotelResponseModel>> { Value = result, StatusCode = 200, Message = $"Hotel list successfully retrieved." };
+            return new BaseResponse<List<HotelResponseModel>> { Value = result, StatusCode = 200, Message = "Hotel list successfully retrieved." };
         }
     }
 }

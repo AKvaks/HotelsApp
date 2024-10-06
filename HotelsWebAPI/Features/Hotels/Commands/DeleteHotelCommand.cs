@@ -21,7 +21,7 @@ namespace HotelsWebAPI.Features.Hotels.Commands
             if (hotelId == null) return new BaseResponse<int> { StatusCode = 500, Message = "Error during communication with database!" };
             if (hotelId == -1) return new BaseResponse<int> { StatusCode = 404, Message = $"Hotel with Id {request.Id} not found!" };
 
-            return new BaseResponse<int> { Value = hotelId.Value, StatusCode = 200, Message = $"Hotel was successfuly deleted!" };
+            return new BaseResponse<int> { Value = hotelId.Value, StatusCode = 200, Message = "Hotel was successfuly deleted!" };
         }
     }
 }
