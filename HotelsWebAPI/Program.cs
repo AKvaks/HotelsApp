@@ -3,6 +3,7 @@ using HotelsWebAPI.DAL;
 using HotelsWebAPI.Services.HotelService;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +34,17 @@ builder.Services.AddScoped<IHotelService, HotelService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    //Enabling descriptions for methods in Swagger
+    options.EnableAnnotations();
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "HotelsWebAPI",
+        Version = "v1",
+        Description = "This is a .NET Core Web API designed as part of a technical interview.",
+    });
+});
 
 var app = builder.Build();
 
@@ -50,7 +61,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//Ensuring that Db is created and all Migrations are applied
+//Ensuring that database is created and all Migrations are applied
 using (var scope = app.Services.CreateScope())
 {
     try
@@ -60,6 +71,8 @@ using (var scope = app.Services.CreateScope())
         {
             dbContext.Database.SetCommandTimeout(300);
             dbContext.Database.Migrate();
+
+            //Enables easy seeding of database
         }
     }
     catch (Exception ex)
@@ -69,7 +82,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-//Implement global error handling
+//Implements global error handling
 app.UseExceptionHandler(appError =>
 {
     appError.Run(async errorContext =>
@@ -79,8 +92,8 @@ app.UseExceptionHandler(appError =>
 
         var errorContextFeature = errorContext.Features.Get<IExceptionHandlerFeature>();
 
-        //If there are unhandled errors, we log them and user gets a minimal, user friendly message
-        //that does not reveal too much unnecessary information 
+        //If there are unhandled exceptions, we log them and user gets a minimal, user friendly message
+        //that does not reveal too much information
         if (errorContextFeature != null)
         {
             Console.WriteLine($"Error: {errorContextFeature.Error}");

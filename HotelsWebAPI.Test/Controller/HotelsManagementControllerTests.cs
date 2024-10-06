@@ -87,7 +87,7 @@ namespace HotelsWebAPI.Tests.Controller
             var fakeResult = new BaseResponse<HotelResponseModel?>
             {
                 StatusCode = 200,
-                Message = "Hotel retrived successfully!",
+                Message = "Hotel retrieved successfully!",
                 Value = fakeHotel
             };
 

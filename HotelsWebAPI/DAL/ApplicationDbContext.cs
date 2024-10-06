@@ -9,8 +9,8 @@ namespace HotelsWebAPI.DAL
 
         public DbSet<Hotel> Hotels { get; set; }
 
-        //I know Entity infers a lot of things but because of Location I deciced 
-        //to ensure how modal will be created
+        //I know Entity Framework infers a lot of things, but I wanted 
+        //to specify Location column as a geography type
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Hotel>(entity =>

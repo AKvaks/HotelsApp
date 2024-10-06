@@ -1,6 +1,6 @@
 ﻿namespace HotelsWebAPI.Models
 {
-    //Probably overkill but I belive every FE developer would be happy to have
+    //Probably overkill, but I believe every FE developer would be happy to have
     //response structured in this way
     public class PagedResponse<T>
     {

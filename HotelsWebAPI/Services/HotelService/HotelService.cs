@@ -10,7 +10,7 @@ namespace HotelsWebAPI.Services.HotelService
     public class HotelService : IHotelService
     {
         //Repository pattern complicates things, but because of that ApplicationDbContext is injected
-        //only here (in one place), which allows easy database switching/changing  
+        //only here (instead of in each Command and/or Query), which allows easy database switching/changing  
         private readonly ApplicationDbContext _dbContext;
         public HotelService(ApplicationDbContext dbContext)
         {

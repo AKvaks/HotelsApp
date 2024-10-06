@@ -4,6 +4,7 @@ using HotelsWebAPI.Features.Hotels.Queries;
 using HotelsWebAPI.Features.Hotels.Validators;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -21,6 +22,7 @@ namespace HotelsWebAPI.Controllers
 
         // GET: api/HotelsManagement
         [HttpGet]
+        [SwaggerOperation(Summary = "Gets all hotels", Description = "Returns the list of all hotels in database")]
         public async Task<ActionResult<List<HotelResponseModel>>> GetAllHotels()
         {
             var result = await _sender.Send(new GetAllHotelsQuery());
@@ -30,6 +32,7 @@ namespace HotelsWebAPI.Controllers
 
         // GET api/HotelsManagement/5
         [HttpGet("{id}")]
+        [SwaggerOperation(Summary = "Gets a hotel specified by Id", Description = "Returns the hotel details for the provided Id")]
         public async Task<ActionResult<HotelResponseModel?>> GetHotelById(int id)
         {
             var command = new GetHotelByIdQuery(id);
@@ -46,6 +49,7 @@ namespace HotelsWebAPI.Controllers
 
         // POST api/HotelsManagement
         [HttpPost]
+        [SwaggerOperation(Summary = "Adds a provided hotel", Description = "Adds a provided hotel to database and returns a message")]
         public async Task<ActionResult<string>> AddHotel(AddHotelCommand command)
         {
             var commandValidation = new AddHotelCommandValidator().Validate(command);
@@ -57,6 +61,7 @@ namespace HotelsWebAPI.Controllers
 
         // PUT api/HotelsManagement
         [HttpPut]
+        [SwaggerOperation(Summary = "Updates a provided hotel", Description = "Updates a provided hotel in database and returns a message")]
         public async Task<ActionResult<string>> UpdateHotelById(EditHotelCommand command)
         {
             var commandValidation = new EditHotelCommandValidator().Validate(command);
@@ -68,6 +73,7 @@ namespace HotelsWebAPI.Controllers
 
         // DELETE api/HotelsManagement
         [HttpDelete]
+        [SwaggerOperation(Summary = "Deletes a hotel specified by Id", Description = "Deletes a hotel specified by Id from database and returns a message")]
         public async Task<ActionResult<int>> DeleteHotelById(DeleteHotelCommand command)
         {
             var commandValidation = new DeleteHotelCommandValidator().Validate(command);
